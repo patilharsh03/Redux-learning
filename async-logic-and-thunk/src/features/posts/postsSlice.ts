@@ -107,6 +107,14 @@ const postsSlice = createSlice({
         state.error = action.error.message
       })
       .addCase(addNewPost.fulfilled, (state, action) => {
+
+        // const sortedPosts = state.posts.sort((a, b)=> {
+        //   if (a.id > b.id) return 1
+        //   if (a.id < b.id) return -1
+        //   return 0
+        // })
+        // action.payload.id = sortedPosts[sortedPosts.length - 1].id + 1
+        // action.payload.id = nanoid();
         action.payload.userId = Number(action.payload.userId)
         action.payload.date = new Date().toISOString()
         action.payload.reactions = {

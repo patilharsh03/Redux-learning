@@ -1,6 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
 import { Post, selectAllPosts, getPostsStatus, getPostsError, fetchPosts } from "./postsSlice";
-import { useEffect } from "react";
 import { ThunkDispatch, AnyAction } from "@reduxjs/toolkit";
 import PostsExcerpt from "./PostsExcerpt";
 
@@ -17,22 +16,25 @@ const PostsList = () => {
   const postsStatus = useSelector(getPostsStatus);
   const error = useSelector(getPostsError);
 
-  useEffect(() => {
-    if (postsStatus === 'idle') {
-      dispatch(fetchPosts())
-    }
-  }, [postsStatus, dispatch])
 
-  // if (postsStatus === 'idle') {
-  //   dispatch(fetchPosts())
-  // }
+  // useEffect giving me an error
+
+  // useEffect(() => {
+  //   if (postsStatus === 'idle') {
+  //     dispatch(fetchPosts())
+  //   }
+  // }, [postsStatus, dispatch])
+
+  if (postsStatus === 'idle') {
+    dispatch(fetchPosts())
+  }
 
   let content;
   if (postsStatus === 'loading') {
     content = <p>"Loading..."</p>
   } else if (postsStatus === 'succeeded') {
     const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
-    content = orderedPosts.map((post, index) => <PostsExcerpt key={index} post={post} />)
+    content = orderedPosts.map((post) => <PostsExcerpt key={post.id} post={post} />)
   } else if (postsStatus === 'failed') {
     content = <p>{error}</p>
 }
