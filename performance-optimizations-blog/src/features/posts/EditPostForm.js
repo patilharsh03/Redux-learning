@@ -1,46 +1,38 @@
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectPostById, updatePost, deletePost, PostsState } from "./postsSlice";
+import { selectPostById, updatePost, deletePost } from "./postsSlice";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { RootState } from "../../app/store";
-
 import { selectAllUsers } from "../users/UsersSlice";
-import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 
 const EditPostForm = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
 
-  const post = useSelector((state: PostsState) =>
-    selectPostById(state, Number(postId))
-  );
+  const post = useSelector((state) => selectPostById(state, Number(postId)));
   const users = useSelector(selectAllUsers);
 
-  const [title, setTitle] = useState(post?.title || "");
-  const [body, setBody] = useState(post?.body || "");
-  const [userId, setUserId] = useState<string | number | undefined>(post?.userId)
+  const [title, setTitle] = useState(post?.title);
+  const [content, setContent] = useState(post?.body);
+  const [userId, setUserId] = useState(post?.userId);
   const [requestStatus, setRequestStatus] = useState("idle");
 
-  const dispatch: ThunkDispatch<RootState, any, AnyAction> = useDispatch();
+  const dispatch = useDispatch();
 
   if (!post) {
     return (
       <section>
-        <h2>Post not found</h2>
+        <h2>Post not found!</h2>
       </section>
     );
   }
 
-  const onTitleChanged = (e: ChangeEvent<HTMLInputElement>) =>
-    setTitle(e.target.value);
-  const onContentChanged = (e: ChangeEvent<HTMLTextAreaElement>) =>
-    setBody(e.target.value);
-  const onAuthorChanged = (e: ChangeEvent<HTMLSelectElement>) =>
-    setUserId((((e.target.value))));
+  const onTitleChanged = (e) => setTitle(e.target.value);
+  const onContentChanged = (e) => setContent(e.target.value);
+  const onAuthorChanged = (e) => setUserId(Number(e.target.value));
 
   const canSave =
-    [title, body, userId].every(Boolean) && requestStatus === "idle";
+    [title, content, userId].every(Boolean) && requestStatus === "idle";
 
   const onSavePostClicked = () => {
     if (canSave) {
@@ -48,18 +40,17 @@ const EditPostForm = () => {
         setRequestStatus("pending");
         dispatch(
           updatePost({
-            title,
-            body,
-            userId: userId!,  // ! is a Non-null assertion operator which tell the compiler that a variable is not or undefined. even if the system is not gurantee it.
             id: post.id,
-            date: post.date,
+            title,
+            body: content,
+            userId,
             reactions: post.reactions,
           })
         ).unwrap();
 
         setTitle("");
-        setBody("");
-        setUserId(post.userId);
+        setContent("");
+        setUserId("");
         navigate(`/post/${postId}`);
       } catch (err) {
         console.error("Failed to save the post", err);
@@ -78,18 +69,11 @@ const EditPostForm = () => {
   const onDeletePostClicked = () => {
     try {
       setRequestStatus("pending");
-      dispatch(deletePost({
-          id: post.id,
-          title,
-          body,
-          userId: userId!,
-          date: post.date,
-          reactions: post.reactions,
-      })).unwrap();
+      dispatch(deletePost({ id: post.id })).unwrap();
 
       setTitle("");
-      setBody("");
-      setUserId(post.userId);
+      setContent("");
+      setUserId("");
       navigate("/");
     } catch (err) {
       console.error("Failed to delete the post", err);
@@ -111,11 +95,7 @@ const EditPostForm = () => {
           onChange={onTitleChanged}
         />
         <label htmlFor="postAuthor">Author:</label>
-        <select
-          id="postAuthor"
-          defaultValue={userId}
-          onChange={onAuthorChanged}
-        >
+        <select id="postAuthor" value={userId} onChange={onAuthorChanged}>
           <option value=""></option>
           {usersOptions}
         </select>
@@ -123,13 +103,12 @@ const EditPostForm = () => {
         <textarea
           id="postContent"
           name="postContent"
-          value={body}
+          value={content}
           onChange={onContentChanged}
         />
         <button type="button" onClick={onSavePostClicked} disabled={!canSave}>
           Save Post
         </button>
-
         <button
           className="deleteButton"
           type="button"

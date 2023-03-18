@@ -1,23 +1,22 @@
-import { PostsState, selectPostById } from "./postsSlice";
 import { useSelector } from "react-redux";
+import { selectPostById } from "./postsSlice";
 
 import PostAuthor from "./PostAuthor";
 import TimeAgo from "./TimeAgo";
-import ReactionButton from "./ReactionButton";
+import ReactionButtons from "./ReactionButton";
 
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-// import { RootState } from "../../app/store";
+const SinglePostPage = () => {
+  const { postId } = useParams();
 
-const SinglePagePost = () => {
-  const { postId } = useParams()
-
-  const post = useSelector((state: PostsState) => selectPostById(state, Number(postId)));
+  const post = useSelector((state) => selectPostById(state, Number(postId)));
 
   if (!post) {
     return (
       <section>
-        <h2>Page not found!</h2>
+        <h2>Post not found!</h2>
       </section>
     );
   }
@@ -31,9 +30,9 @@ const SinglePagePost = () => {
         <PostAuthor userId={post.userId} />
         <TimeAgo timestamp={post.date} />
       </p>
-      <ReactionButton post={post} />
+      <ReactionButtons post={post} />
     </article>
   );
 };
 
-export default SinglePagePost;
+export default SinglePostPage;
